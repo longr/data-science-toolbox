@@ -52,6 +52,7 @@ project:
         - file: methods/uk-crop-classification-prithvi/prithvi-uk-crop-fine-tuning.ipynb 
 
 site:
+  url: https://nerc-ceh.github.io/data-science-toolbox
   template: book-theme
   options:
     favicon: images/ukceh-edsb-logo-updated-black.svg
