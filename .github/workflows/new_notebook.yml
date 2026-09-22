@@ -1,0 +1,29 @@
+# This file was created automatically with `jupyter-book init --gh-pages` 🪄 💚
+# Ensure your GitHub Pages settings for this repository are set to deploy with **GitHub Actions**.
+
+name: Submit a new notebook
+on:
+  issues:
+    types: [opened, labeled]
+
+jobs:
+  create-pr:
+    # Only runif the notebook has the label "notebook inclusion"
+    if: contains(github.event.issue.labels.*.name, 'notebook inclusion')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: Parse Issue Form
+        id: parse
+        uses: peter-evans/issue-form-body-parser@v3
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          separator: '###'
+          label-token: ''
