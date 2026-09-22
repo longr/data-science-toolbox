@@ -1,8 +1,7 @@
 name: Notebook Inclusion Request
 description: Submit a completed notebook for review and inclusion.
 title: "Including notebook on ..."
-labels:
-  - notebook-inclusion
+labels: ["notebook inclusion"]
 assignees:
   - Jez-Carter
 
