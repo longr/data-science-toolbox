@@ -22,7 +22,7 @@ jobs:
 
       - name: Parse Issue Form
         id: parse
-        uses: peter-evans/issue-form-body-parser@v3
+        uses: peter-evans/issue-forms-body-parser@v3
         with:
           issue-number: ${{ github.event.issue.number }}
           separator: '###'
