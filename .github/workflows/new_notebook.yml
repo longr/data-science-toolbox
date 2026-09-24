@@ -24,6 +24,13 @@ jobs:
         id: parse
         uses: peter-murray/issue-forms-body-parser@v4.0.0
         with:
-          issue-number: ${{ github.event.issue.number }}
+          issue_id: ${{ github.event.issue.number }}
           separator: '###'
-          label-token: ''
+          label_marker_start: '>>'
+          label_marker_end: '<<'
+
+      - name: Show parsed data JSON
+        env:
+          parsed_data: ${{ steps.parse.outputs.payload }}
+        run: |
+          echo "$parsed_data"
