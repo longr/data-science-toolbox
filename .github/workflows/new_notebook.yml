@@ -4,7 +4,7 @@
 name: Submit a new notebook
 on:
   issues:
-    types: [opened, labeled]
+    types: [labeled]
 
 jobs:
   create-pr:
