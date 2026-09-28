@@ -47,7 +47,7 @@ jobs:
           PARSED_DATA: ${{ steps.parse.outputs.data }}
         run: |
           # Extract "Repository Details" verbatim and append to notebook.yml
-          echo "$PARSED_DATA" | jq -r '."Repository Details"' >> notebook.yml
+          echo "$PARSED_DATA" | jq -r '."repository-details".list[0].text' >> notebook.yml
 
           # Add a trailing newline to ensure valid YAML structure
           echo "" >> notebook.yml
