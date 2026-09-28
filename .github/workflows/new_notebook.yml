@@ -46,11 +46,12 @@ jobs:
         env:
           PARSED_DATA: ${{ steps.parse.outputs.data }}
         run: |
-          # Extract "Repository Details" verbatim and append to notebook.yml
-          echo "$PARSED_DATA" | jq -r '."repository-details".text' >> notebook.yml
+          # Extract everything after 'notebooks:' under '### Repository Details'
+          echo "$BODY" | awk '/### Repository Details/{flag=1; next} /### /{flag=0} flag' \
+            | grep -v '^notebooks:' >> notebooks.yml
 
           # Add a trailing newline to ensure valid YAML structure
-          echo "" >> notebook.yml
+          echo "" >> notebooks.yml
           
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
