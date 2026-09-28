@@ -41,7 +41,17 @@ jobs:
           JSON: ${parsed_data}
           ==========================================
           EOF
+          
+      - name: Append Repository Details to notebook.yml
+        env:
+          PARSED_DATA: ${{ steps.parse.outputs.data }}
+        run: |
+          # Extract "Repository Details" verbatim and append to notebook.yml
+          echo "$PARSED_DATA" | jq -r '."Repository Details"' >> notebook.yml
 
+          # Add a trailing newline to ensure valid YAML structure
+          echo "" >> notebook.yml
+          
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
