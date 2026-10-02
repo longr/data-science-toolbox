@@ -85,3 +85,4 @@ notebooks:
     path: prithvi-uk-crop-fine-tuning.ipynb
     assets:
       - crop-classification.png
+
