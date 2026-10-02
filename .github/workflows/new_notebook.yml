@@ -60,6 +60,24 @@ jobs:
           # 3. Add a trailing newline after the block
           echo "" >> notebooks.yml
 
+      - name: Extract and Format Repo Name
+        env:
+          BODY: ${{ github.event.issue.body }}
+        run: |
+          # Extract the URL line under Repository Details
+          URL=$(echo "$BODY" | grep -oE 'https?://[^ ]+' | head -n 1)
+
+          # Strip URL path and .git suffix
+          RAW_NAME=$(basename "$URL" .git)
+
+          # Strip existing 'ds-toolbox-notebook-' prefix if present
+          CLEAN_NAME="${RAW_NAME#ds-toolbox-notebook-}"
+
+          # Construct final string
+          FORMATTED_NAME="ds-toolbox-notebook-${CLEAN_NAME}/${CLEAN_NAME}"
+
+          echo "FORMATTED_NAME=${FORMATTED_NAME}" >> $GITHUB_ENV
+          echo "Formatted repository path: ${FORMATTED_NAME}"
           
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
