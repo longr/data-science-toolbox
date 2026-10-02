@@ -50,7 +50,7 @@ jobs:
           # 1. Extract block under Repository Details
           # 2. Filter out 'notebooks:' line if present
           # 3. Add '|| true' so grep exit code 1 won't fail the job
-          echo "$BODY" | awk '/### Repository Details/{flag=1; next} /### /{flag=0} flag' \
+          echo "$BODY" | awk '/### Repository Details/{flag=1; next} /### /{flag=0} flag if (flag) print "  " $0' \
             | grep -v 'notebooks:' >> notebooks.yml || true
 
           # Ensure a trailing newline exists
