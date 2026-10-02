@@ -47,14 +47,15 @@ jobs:
           PARSED_DATA: ${{ steps.parse.outputs.data }}
           BODY: ${{ github.event.issue.body }}
         run: |
-          # 1. Extract block under Repository Details
-          # 2. Filter out 'notebooks:' line if present
-          # 3. Add '|| true' so grep exit code 1 won't fail the job
-          echo "$BODY" | awk '/### Repository Details/{flag=1; next} /### /{flag=0} flag if (flag) print "  " $0' \
-            | grep -v 'notebooks:' >> notebooks.yml || true
+          # 1. Slice out Repository Details
+          # 2. Skip empty lines or lines matching 'notebooks:'
+          # 3. Indent remaining lines by 2 spaces
+          echo "$BODY" | awk '
+            /### Repository Details/ { flag=1; next }
+            /### / { flag=0 }
+            flag && !/notebooks:/ && NF { print "  " $0 }
+          ' >> notebooks.yml
 
-          # Ensure a trailing newline exists
-          echo "" >> notebooks.yml        
           
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
