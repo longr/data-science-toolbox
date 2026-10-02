@@ -47,14 +47,18 @@ jobs:
           PARSED_DATA: ${{ steps.parse.outputs.data }}
           BODY: ${{ github.event.issue.body }}
         run: |
-          # 1. Slice out Repository Details
-          # 2. Skip empty lines or lines matching 'notebooks:'
-          # 3. Indent remaining lines by 2 spaces
+          # 1. Add a leading newline before the block
+          echo "" >> notebooks.yml
+          # 2.1 Slice out Repository Details
+          # 2.2. Skip empty lines or lines matching 'notebooks:'
+          # 2.3. Indent remaining lines by 2 spaces
           echo "$BODY" | awk '
             /### Repository Details/ { flag=1; next }
             /### / { flag=0 }
             flag && !/notebooks:/ && NF { print "  " $0 }
           ' >> notebooks.yml
+          # 3. Add a trailing newline after the block
+          echo "" >> notebooks.yml
 
           
       - name: Create Pull Request
