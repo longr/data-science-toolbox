@@ -59,25 +59,38 @@ jobs:
           ' >> notebooks.yml
           # 3. Add a trailing newline after the block
           echo "" >> notebooks.yml
-
-      - name: Extract and Format Repo Name
+          
+      - name: Extract and Format Repo Name and Path
         env:
           BODY: ${{ github.event.issue.body }}
         run: |
-          # Extract the URL line under Repository Details
-          URL=$(echo "$BODY" | grep -oE 'https?://[^ ]+' | head -n 1)
+          # 1. Isolate the '### Repository Details' block
+          SECTION_BODY=$(echo "$BODY" | awk '/### Repository Details/{flag=1; next} /### /{flag=0} flag')
 
-          # Strip URL path and .git suffix
-          RAW_NAME=$(basename "$URL" .git)
+          # 2. Extract the URL from this section
+          URL=$(echo "$SECTION_BODY" | grep -oE 'https?://[^ ]+' | head -n 1)
+
+          # 3. Extract the 'path:' value (e.g., notebook.ipynb)
+          PATH_VAL=$(echo "$SECTION_BODY" | awk -F'path:' '/path:/{print $2}' | xargs)
+
+          # Strip trailing .git or trailing slashes from URL
+          URL_CLEAN=$(echo "$URL" | sed 's/\.git$//' | sed 's/\/$//')
+
+          # Get the raw repo name
+          RAW_NAME=$(basename "$URL_CLEAN")
 
           # Strip existing 'ds-toolbox-notebook-' prefix if present
           CLEAN_NAME="${RAW_NAME#ds-toolbox-notebook-}"
 
-          # Construct final string
-          FORMATTED_NAME="ds-toolbox-notebook-${CLEAN_NAME}/${CLEAN_NAME}"
+          # Construct final string: ds-toolbox-notebook-<clean>/<path_value>
+          FORMATTED_NAME="ds-toolbox-notebook-${CLEAN_NAME}/${PATH_VAL}"
 
+          # Export to $GITHUB_ENV for subsequent workflow steps
           echo "FORMATTED_NAME=${FORMATTED_NAME}" >> $GITHUB_ENV
-          echo "Formatted repository path: ${FORMATTED_NAME}"
+          
+          echo "Extracted URL:  ${URL}"
+          echo "Extracted Path: ${PATH_VAL}"
+          echo "Formatted Name: ${FORMATTED_NAME}"
           
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
