@@ -92,47 +92,48 @@ jobs:
           echo "Extracted Path: ${PATH_VAL}"
           echo "Formatted Name: ${FORMATTED_NAME}"
 
-
       - name: Append Path to myst.yml preserving exact formatting
         env:
           FORMATTED_PATH: ${{ env.FORMATTED_NAME }}
         run: |
           awk -v new_entry="        - file: methods/${FORMATTED_PATH}" '
             {
-              # 1. Look for the target title section
+              # Track when we enter "Data Science Methods" section
               if ($0 ~ /title:[[:space:]]*Data Science Methods/) {
                 in_target=1
               }
 
-              # 2. Track when we enter its children list
+              # Track when we hit its "children:" array
               if (in_target && $0 ~ /children:/) {
                 in_children=1
               }
 
-              # 3. Detect when children section ends (new root item or new title heading)
-              if (in_children && !/children:/ && (/^[[:space:]]*- title:/ || /^[[:space:]]*- file:/ || /^[a-zA-Z0-9_]+:/)) {
-                # Check if indentation level matches top-level or sibling items
-                if ($0 !~ /^[[:space:]]{8}- file:/) {
-                  print new_entry
-                  inserted=1
-                  in_target=0
-                  in_children=0
-                }
+              # Track if we leave "Data Science Methods" (hit next root key or title)
+              if (in_target && $0 ~ /^  - title:/ && $0 !~ /Data Science Methods/) {
+                in_target=0
+                in_children=0
               }
 
-              # Print current line untouched
-              print $0
+              # If inside children, remember the last child line index and print as normal
+              if (in_children && $0 ~ /^[[:space:]]+- file:/) {
+                last_child_line = NR
+              }
+
+              lines[NR] = $0
             }
 
-            # If the section was at the very end of the file
             END {
-              if (in_children && !inserted) {
-                print new_entry
+              for (i = 1; i <= NR; i++) {
+                print lines[i]
+                # Insert the new entry directly after the last child file entry
+                if (i == last_child_line) {
+                  print new_entry
+                }
               }
             }
           ' myst.yml > myst.tmp && mv myst.tmp myst.yml
 
-      - name: Verify myst.yml formatting
+      - name: Verify myst.yml output
         run: |
           cat myst.yml
           
