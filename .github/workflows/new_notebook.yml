@@ -91,6 +91,21 @@ jobs:
           echo "Extracted URL:  ${URL}"
           echo "Extracted Path: ${PATH_VAL}"
           echo "Formatted Name: ${FORMATTED_NAME}"
+
+      - name: Append Path to Data Science Methods in myst.yml
+        env:
+          # FORMATTED_NAME comes from $GITHUB_ENV (e.g. "ds-toolbox-notebook-biascorrection/bias-correction.ipynb")
+          FORMATTED_PATH: ${{ env.FORMATTED_NAME }}
+        run: |
+          # Use yq to find the entry in 'toc' titled 'Data Science Methods'
+          # and append the new file object to its 'children' array
+          yq -i '
+            (.toc[] | select(.title == "Data Science Methods").children) += [{"file": "methods/'"$FORMATTED_PATH"'"}]
+          ' myst.yml
+
+      - name: Verify updated myst.yml
+        run: |
+          cat myst.yml
           
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
