@@ -19,32 +19,9 @@ jobs:
     steps:
       - name: checkout repository
         uses: actions/checkout@v4
-
-      - name: Parse Issue Form
-        id: parse
-        uses: zentered/issue-forms-body-parser@v3.0.0
-        with:
-          body: ${{ github.event.issue.body }}
-
-      - name: Show parsed data JSON
-        env:
-          parsed_data: ${{ steps.parse.outputs.data }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
-          ISSUE_TITLE: ${{ github.event.issue.title }}
-        run: |
-          cat << EOF > pr_test_file.md
-          ==========================================
-          ISSUE NUMBER: #${ISSUE_NUMBER}
-          ISSUE TITLE: ${ISSUE_TITLE}
-          ==========================================
-          ==========================================
-          JSON: ${parsed_data}
-          ==========================================
-          EOF
-          
+        
       - name: Append Repository Details to notebook.yml
         env:
-          PARSED_DATA: ${{ steps.parse.outputs.data }}
           BODY: ${{ github.event.issue.body }}
         run: |
           # 1. Add a leading newline before the block
@@ -132,19 +109,15 @@ jobs:
               }
             }
           ' myst.yml > myst.tmp && mv myst.tmp myst.yml
-
-      - name: Verify myst.yml output
-        run: |
-          cat myst.yml
           
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
-          commit-message: "test: generate dummy file for issue #${{ github.event.issue.number }}"
+          commit-message: "Starting new notebook: generate base files for including new notebook described in issue #${{ github.event.issue.number }}"
           committer: "GitHub Actions Bot <actions@github.com>"
           author: "GitHub Actions Bot <actions@github.com>"
-          title: "Test PR from Issue #${{ github.event.issue.number }}"
-          body: "This is a static test PR triggered by Issue #${{ github.event.issue.number }}."
-          branch: "test-pr-issue-${{ github.event.issue.number }}"
+          title: "New notebook from Issue #${{ github.event.issue.number }}"
+          body: "This is an initial PR triggered by Issue #${{ github.event.issue.number }}. Please check and test before merging"
+          branch: "new_notebook-issue-${{ github.event.issue.number }}"
           delete-branch: false
           
